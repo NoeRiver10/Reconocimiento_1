@@ -1,7 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const DimensionesArea = ({ formData, handleChange, visible, toggleSection, calculateMinAreas, calculateMaxAreas }) => {
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleToggle = () => toggleSection('dimensiones');
+
+  const validateDimension = (name, value) => {
+    if (value < 0) {
+      setErrorMessage(`El valor de ${name} debe ser mayor o igual que cero.`);
+      return false;
+    }
+    setErrorMessage(''); // Resetear mensaje de error
+    return true;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    const numericValue = Math.max(0, parseFloat(value)); // Asegurar que el valor sea >= 0
+
+    if (validateDimension(name, numericValue)) {
+      handleChange({ target: { name, value: numericValue } });
+    }
+  };
 
   return (
     <div className="border rounded-lg shadow-sm">
@@ -11,6 +31,9 @@ const DimensionesArea = ({ formData, handleChange, visible, toggleSection, calcu
       {visible && (
         <div className="bg-gray-100 p-4 dark:bg-gray-800 rounded-b-lg">
           <h2 className="font-semibold mb-2 text-center">DIMENSIONES DEL ÁREA</h2>
+          {errorMessage && (
+            <div className="bg-red-500 text-white p-2 rounded mb-4 text-center">{errorMessage}</div>
+          )}
           <div className="grid grid-cols-1 gap-4">
             <div>
               <label>ALTURA (mts):</label>
@@ -18,7 +41,7 @@ const DimensionesArea = ({ formData, handleChange, visible, toggleSection, calcu
                 type="number"
                 name="altura"
                 value={formData.altura}
-                onChange={handleChange}
+                onChange={handleInputChange} // Usar la función modificada
                 min="0" // Asegura que la altura sea positiva
                 required
                 className="border p-2 rounded w-full"
@@ -30,7 +53,7 @@ const DimensionesArea = ({ formData, handleChange, visible, toggleSection, calcu
                 type="number"
                 name="largo"
                 value={formData.largo}
-                onChange={handleChange}
+                onChange={handleInputChange} // Usar la función modificada
                 min="0" // Asegura que el largo sea positivo
                 required
                 className="border p-2 rounded w-full"
@@ -42,7 +65,7 @@ const DimensionesArea = ({ formData, handleChange, visible, toggleSection, calcu
                 type="number"
                 name="ancho"
                 value={formData.ancho}
-                onChange={handleChange}
+                onChange={handleInputChange} // Usar la función modificada
                 min="0" // Asegura que el ancho sea positivo
                 required
                 className="border p-2 rounded w-full"
