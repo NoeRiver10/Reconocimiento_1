@@ -85,39 +85,16 @@ const IdentificacionArea = ({ formData, handleChange, visible, toggleSection }) 
                 <option value="COMBINADA">COMBINADA</option>
               </select>
             </div>
-            {/* Nuevo campo: Tipo de Superficie */}
+            {/* Nuevo campo: Descripción de la Superficie */}
             <div>
-              <label>TIPO DE SUPERFICIE:</label>
-              <select
-                name="tipoSuperficie"
-                value={formData.tipoSuperficie}
+              <label>DESCRIPCIÓN DE LA SUPERFICIE:</label>
+              <textarea
+                name="descripcionSuperficie"
+                value={formData.descripcionSuperficie}
                 onChange={handleChange}
+                required
                 className="border p-2 rounded w-full"
-              >
-                <option value="">SELECCIONA UNA OPCIÓN</option>
-                <option value="TECHO">TECHO</option>
-                <option value="PARED">PARED</option>
-                <option value="PISO">PISO</option>
-              </select>
-            </div>
-            {/* Nuevo campo: Colores */}
-            <div>
-              <label>COLORES:</label>
-              <select
-                name="color"
-                value={formData.color}
-                onChange={handleChange}
-                className="border p-2 rounded w-full"
-              >
-                <option value="">Selecciona un color</option>
-                <option value="Blanco">Blanco</option>
-                <option value="Gris">Gris</option>
-                <option value="Negro">Negro</option>
-                <option value="Azul">Azul</option>
-                <option value="Verde">Verde</option>
-                <option value="Rojo">Rojo</option>
-                <option value="Amarillo">Amarillo</option>
-              </select>
+              />
             </div>
           </div>
         </div>

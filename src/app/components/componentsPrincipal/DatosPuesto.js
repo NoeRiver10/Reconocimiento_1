@@ -128,19 +128,6 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
               ></textarea>
             </div>
             <div>
-              <label htmlFor="tareaVisual">TAREA VISUAL:</label>
-              <input
-                type="text"
-                id="tareaVisual"
-                name="tareaVisual"
-                value={formData.tareaVisual}
-                onChange={handleChange}
-                className="border p-2 rounded w-full"
-                required
-              />
-            </div>
-
-            <div>
               <label htmlFor="nivelMinimoIluminacion">NIVEL MÍNIMO DE ILUMINACIÓN (lux):</label>
               <select
                 id="nivelMinimoIluminacion"

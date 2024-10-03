@@ -15,30 +15,16 @@ const PercepcionTrabajo = ({ formData, handleChange, visible, toggleSection }) =
           <h2 className="font-semibold mb-2 text-center">PERCEPCIÓN DEL TRABAJO</h2>
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <label>¿SABES EL NOMBRE DEL TRABAJADOR?:</label>
-              <select
-                name="tieneNombreTrabajador"
-                value={formData.tieneNombreTrabajador}
+              <label>NOMBRE DEL TRABAJADOR:</label>
+              <input
+                type="text"
+                name="nombreTrabajador"
+                value={formData.nombreTrabajador}
                 onChange={handleChange}
+                required
                 className="border p-2 rounded w-full"
-              >
-                <option value="NO">NO</option>
-                <option value="SÍ">SÍ</option>
-              </select>
+              />
             </div>
-            {formData.tieneNombreTrabajador === 'SÍ' && (
-              <div>
-                <label>NOMBRE DEL TRABAJADOR:</label>
-                <input
-                  type="text"
-                  name="nombreTrabajador"
-                  value={formData.nombreTrabajador}
-                  onChange={handleChange}
-                  required
-                  className="border p-2 rounded w-full"
-                />
-              </div>
-            )}
             <div>
               <label>DESCRIPCIÓN:</label>
               <textarea

@@ -4,11 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link'; 
 import './globals.css'; 
 
-import IdentificacionArea from './components/IdentificacionArea';
-import DimensionesArea from './components/DimensionesArea'; 
-import Luminaria from './components/Luminaria'; 
-import PercepcionTrabajo from './components/PercepcionTrabajo'; 
-import DatosPuesto from './components/DatosPuesto'; 
+import IdentificacionArea from './components/componentsPrincipal/IdentificacionArea';
+import DimensionesArea from './components/componentsPrincipal/DimensionesArea'; 
+import Luminaria from './components/componentsPrincipal/Luminaria'; 
+import PercepcionTrabajo from './components/componentsPrincipal/PercepcionTrabajo'; 
+import DatosPuesto from './components/componentsPrincipal/DatosPuesto'; 
 
 export default function Reconocimiento() {
   const [areaCount, setAreaCount] = useState(1); 
@@ -17,7 +17,6 @@ export default function Reconocimiento() {
     areaIluminada: '',
     numPuntosEvaluar: '',
     tipoIluminacion: 'ARTIFICIAL',
-    color: '',
     tipoSuperficie: '',
     altura: '',
     largo: '',
@@ -98,8 +97,7 @@ export default function Reconocimiento() {
       areaIluminada: formData.areaIluminada,
       numPuntosEvaluar: formData.numPuntosEvaluar,
       tipoIluminacion: formData.tipoIluminacion,
-      color: formData.color,
-      tipoSuperficie: formData.tipoSuperficie,
+      descripcionSuperficie: formData.descripcionSuperficie,
       altura: formData.altura,
       largo: formData.largo,
       ancho: formData.ancho,
@@ -109,7 +107,6 @@ export default function Reconocimiento() {
       puestoTrabajador: formData.puestoTrabajador,
       numTrabajadores: formData.numTrabajadores,
       descripcionActividades: formData.descripcionActividades,
-      tareaVisual: formData.tareaVisual,
       nivelMinimoIluminacion: formData.nivelMinimoIluminacion,
     };
   
@@ -147,7 +144,6 @@ export default function Reconocimiento() {
       areaIluminada: '',
       numPuntosEvaluar: '',
       tipoIluminacion: 'ARTIFICIAL',
-      color: '',
       tipoSuperficie: '',
       altura: '',
       largo: '',

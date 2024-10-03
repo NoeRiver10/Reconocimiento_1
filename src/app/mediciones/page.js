@@ -1,234 +1,95 @@
-"use client"; // Asegúrate de incluir esta línea al inicio del archivo
-
+"use client"; 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation'; // Importar desde 'next/navigation'
+import IdAreaMediciones from '../components/componentsMediciones/idareaMediciones';
+import IluminacionMediciones from '../components/componentsMediciones/IluminacionMediciones';
+import MedicionItem from '../components/componentsMediciones/medicionItem';
 
-export default function Mediciones({ areaIluminada }) {
+export default function Mediciones() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     tipoIluminacion: 'ARTIFICIAL',
-    iluminacionLocalizada: 'SÍ',
-    area: areaIluminada || '', // Inicializa con el prop
+    cci: 'SÍ',
+    area: '',
     departamento: '',
     numeroPuntos: '',
     mediciones: [],
   });
+  
   const [visibleSections, setVisibleSections] = useState({
     tipoIluminaria: true,
     medicion: true,
   });
+
   useEffect(() => {
-    // Log para verificar el valor de areaIluminada
-    console.log('Área iluminada desde props:', areaIluminada);
-
-    // Solo actualiza si `areaIluminada` es diferente
-    if (areaIluminada && formData.area !== areaIluminada) {
-      setFormData((prev) => ({
-        ...prev,
-        area: areaIluminada,
-      }));
+    const areaIluminada = router.query?.areaIluminada || ''; // Usar el operador de encadenamiento opcional
+    console.log('router.query:', router.query); // Verifica el contenido de router.query
+    console.log('Área iluminada antes de establecer:', areaIluminada); // Verificar el valor
+    if (areaIluminada) {
+      setFormData((prev) => ({ ...prev, area: areaIluminada })); // Aquí estás actualizando el estado
     }
-  }, [areaIluminada, formData.area]);
-
+  }, [router.query]);
   
+  // Alternar la visibilidad de las secciones
   const toggleSection = (section) => {
-    setVisibleSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setVisibleSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Datos enviados:', formData);
-  };
-
+  
+  // Agregar una nueva medición
   const addMedicion = () => {
-    const newMedicion = {
-      puesto: '',
-      identificacion: '',
-      horario: '',
-      e1: '',
-      e2: '',
-    };
-    setFormData((prev) => ({
-      ...prev,
-      mediciones: [...prev.mediciones, newMedicion],
-    }));
+    const newMedicion = { puesto: '', identificacion: '', horario: '', e1: '', e2: '' };
+    setFormData((prev) => ({ ...prev, mediciones: [...prev.mediciones, newMedicion] }));
   };
 
+  // Manejar cambios en una medición específica
   const handleMedicionChange = (index, e) => {
     const { name, value } = e.target;
     const newMediciones = [...formData.mediciones];
-    newMediciones[index] = {
-      ...newMediciones[index],
-      [name]: value,
-    };
+    newMediciones[index] = { ...newMediciones[index], [name]: value };
     setFormData({ ...formData, mediciones: newMediciones });
-  };
-
-  const renderMediciones = () => {
-    const numPuntos = parseInt(formData.numeroPuntos, 10);
-    const numMediciones = formData.iluminacionLocalizada === 'SÍ' ? 4 : 3;
-
-    return Array.from({ length: numPuntos }, (_, index) => (
-      <div key={index} className="mb-4 border p-4 rounded-lg shadow-sm bg-gray-100 dark:bg-gray-800">
-        <h3>Medición {index + 1}</h3>
-        <div>
-          <label>Puesto:</label>
-          <input
-            type="text"
-            name="puesto"
-            value={formData.mediciones[index]?.puesto || ''}
-            onChange={(e) => handleMedicionChange(index, e)}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-        </div>
-        <div>
-          <label>Identificación:</label>
-          <input
-            type="text"
-            name="identificacion"
-            value={formData.mediciones[index]?.identificacion || ''}
-            onChange={(e) => handleMedicionChange(index, e)}
-            className="border p-2 mb-2 w-full"
-            required
-          />
-        </div>
-
-        {Array.from({ length: formData.tipoIluminacion === 'ARTIFICIAL' ? 1 : numMediciones }, (_, i) => (
-          <div key={i} className='mb-4'>
-            <h4 className="font-semibold">{formData.tipoIluminacion === 'ARTIFICIAL' ? 'Medición' : `Medición ${i + 1}`}</h4>
-            <label>Horario:</label>
-            <input
-              type="time"
-              name="horario"
-              value={formData.mediciones[index]?.horario || ''}
-              onChange={(e) => handleMedicionChange(index, e)}
-              className="border p-2 mb-2 w-full"
-            />
-            <label>E2:</label>
-            <input
-              type="number"
-              name="e2"
-              value={formData.mediciones[index]?.e2 || ''}
-              onChange={(e) => handleMedicionChange(index, e)}
-              className="border p-2 mb-2 w-full"
-            />
-            <label>E1:</label>
-            <input
-              type="number"
-              name="e1"
-              value={formData.mediciones[index]?.e1 || ''}
-              onChange={(e) => handleMedicionChange(index, e)}
-              className="border p-2 mb-2 w-full"
-            />
-          </div>
-        ))}
-      </div>
-    ));
   };
 
   return (
     <div className="container mx-auto p-4 bg-white dark:bg-gray-900 max-w-3xl rounded-lg shadow-lg">
       <h1 className="text-2xl font-bold mb-4 text-black dark:text-white text-center">MEDICIONES</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="border rounded-lg shadow-sm">
-          <button type="button" className="bg-red-500 text-white w-full px-4 py-2 rounded-t-lg" onClick={() => toggleSection('tipoIluminaria')}>
-            Iluminación 
-          </button>
-          {visibleSections.tipoIluminaria && (
-            <div className="bg-gray-100 p-4 mt-2 dark:bg-gray-800">
-              <h2 className="font-semibold mb-2 text-center">TIPO DE ILUMINACIÓN</h2>
-              <div>
-                <label>TIPO DE ILUMINACIÓN:</label>
-                <select
-                  name="tipoIluminacion"
-                  value={formData.tipoIluminacion}
-                  onChange={handleChange}
-                  className="border p-2 w-full">
-                  <option value="ARTIFICIAL">ARTIFICIAL</option>
-                  <option value="COMBINADA">COMBINADA</option>
-                </select>
-              </div>
-              <div>
-                <label>¿EXISTE CCI?:</label>
-                <select
-                  name="iluminacionLocalizada"
-                  value={formData.iluminacionLocalizada}
-                  onChange={formData.tipoIluminacion === 'ARTIFICIAL' ? undefined : handleChange} // Deshabilitar si es artificial
-                  className="border p-2 rounded w-full"
-                  disabled={formData.tipoIluminacion === 'ARTIFICIAL'}
-                >
-                  <option value="SÍ">SÍ</option>
-                  <option value="NO">NO</option>
-                </select>
-              </div>
-            </div>
-          )}
-        </div>
+      <form className="space-y-4">
+        {/* Componente para la iluminación */}
+        <IluminacionMediciones 
+          formData={formData} 
+          handleChange={handleChange} 
+          toggleSection={toggleSection} 
+          visibleSections={visibleSections} 
+        />
+        
+        {/* Componente para el área y el departamento */}
+        <IdAreaMediciones
+         formData={formData} // Asegúrate de que formData se pase aquí
+         handleChange={handleChange}
+        />
 
-        <div className="border rounded-lg shadow-sm mt-4">
-          <button type="button" className="bg-red-500 text-white w-full px-4 py-2 rounded-t-lg" onClick={() => toggleSection('medicion')}>
-            Área
-          </button>
-          {visibleSections.medicion && (
-            <div className="bg-gray-100 p-4 mt-2 dark:bg-gray-800">
-              <h2 className="font-semibold mb-2 text-center">ÁREA</h2>
-              <div>
-                <label>ÁREA:</label>
-                <input
-                type="text"
-                name="area"
-                value={formData.area} // Este es el valor que quieres que se muestre
-                onChange={handleChange}
-                required
-                className="border p-2 w-full"
-                />
-              </div>
-              <div>
-                <label>DEPARTAMENTO:</label>
-                <input
-                  type="text"
-                  name="departamento"
-                  value={formData.departamento}
-                  onChange={handleChange}
-                  required
-                  className="border p-2 w-full"
-                />
-              </div>
-              <div>
-                <label>NÚMERO DE PUNTOS:</label>
-                <input
-                  type="number"
-                  name="numeroPuntos"
-                  value={formData.numeroPuntos}
-                  onChange={handleChange}
-                  className="border p-2 w-full"
-                  required
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        {/* Mostrar tantas mediciones como el número de puntos ingresado */}
+        {Array.from({ length: parseInt(formData.numeroPuntos || 0, 10) }).map((_, index) => (
+          <MedicionItem 
+            key={index} 
+            index={index} 
+            formData={formData} // Pasar formData completo
+            handleMedicionChange={handleMedicionChange} 
+          />
+        ))}
 
-        {/* Renderizar las mediciones según el número de puntos */}
-        {renderMediciones()}
-
-        <button type="button" onClick={addMedicion} className="bg-blue-500 text-white px-4 py-2">
+        {/* Botón para agregar más mediciones */}
+        <button 
+          type="button" 
+          onClick={addMedicion} 
+          className="bg-blue-500 text-white px-4 py-2 rounded">
           Agregar Medición
         </button>
-
-        <button type="submit" className="bg-green-500 text-white px-4 py-2">Enviar</button>
       </form>
     </div>
   );
