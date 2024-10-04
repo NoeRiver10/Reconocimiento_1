@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
+const DatosPuesto = ({ formData = {}, handleChange, visible, toggleSection }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [description, setDescription] = useState('');
   const [visualTask, setVisualTask] = useState('');
@@ -12,41 +12,41 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
     },
     50: {
       visualTask: 'En interiores: distinguir el área de tránsito, desplazarse caminando, vigilancia, movimiento de vehículos.',
-      workArea: 'Interiores generales: almacenes de poco movimiento, pasillos, escaleras, estacionamientos cubiertos, labores en minas subterráneas, iluminación de emergencia. .'
+      workArea: 'Interiores generales: almacenes de poco movimiento, pasillos, escaleras, estacionamientos cubiertos, labores en minas subteráneas, iluminación de emergencia.'
     },
     100: {
       visualTask: 'En interiores. ',
-      workArea: 'Areas de circulación y pasillos; salas de espera; salas de descanso; cuartos de almacén; plataformas; cuartos de calderas. '
+      workArea: 'Areas de circulación y pasillos; salas de espera; salas de descanso; cuartos de almacén; plataformas; cuartos de calderas.'
     },
     200: {
-      visualTask: 'Requerimiento visual simple:inspección visual, recuento de piezas, trabajo en banco y máquina.',
-      workArea: 'Servicios al personal: almacenaje rudo,recepción y despacho, casetas de vigilancia, cuartos de compresores y pailería. '
+      visualTask: 'Requerimiento visual simple: inspección visual, recuento de piezas, trabajo en banco y máquina.',
+      workArea: 'Servicios al personal: almacenaje rudo, recepción y despacho, casetas de vigilancia, cuartos de compresores y pailería.'
     },
     300: {
-      visualTask: 'Distinción moderada de detalles: ensamble simple, trabajo medio en banco y máquina, inspección simple, empaque y trabajos de oficina. ',
-      workArea: 'Talleres: áreas de empaque y ensamble, aulas y oficinas. '
+      visualTask: 'Distinción moderada de detalles: ensamble simple, trabajo medio en banco y máquina, inspección simple, empaque y trabajos de oficina.',
+      workArea: 'Talleres: áreas de empaque y ensamble, aulas y oficinas.'
     },
     500: {
-      visualTask: 'Distinción clara de detalles: maquinado y acabados delicados, ensamble de inspección moderadamente difícil, captura y procesamiento de información, manejo de instrumentos y equipo de laboratorio. ',
-      workArea: 'Talleres de precisión: salas de cómputo, áreas de dibujo, laboratorios. '
+      visualTask: 'Distinción clara de detalles: maquinado y acabados delicados, ensamble de inspección moderadamente difícil, captura y procesamiento de información, manejo de instrumentos y equipo de laboratorio.',
+      workArea: 'Talleres de precisión: salas de cómputo, áreas de dibujo, laboratorios.'
     },
     750: {
-      visualTask: 'Distinción fina de detalles: maquinado de precisión, ensamble e inspecciónde trabajos delicados, manejo de instrumentos y equipo de precisión,manejo de piezas pequeñas.',
+      visualTask: 'Distinción fina de detalles: maquinado de precisión, ensamble e inspección de trabajos delicados, manejo de instrumentos y equipo de precisión, manejo de piezas pequeñas.',
       workArea: 'Talleres de alta precisión: de pintura y acabado de superficies y laboratorios de control de calidad.'
     },
     1000: {
       visualTask: 'Alta exactitud en la distinción de detalles: ensamble, proceso e inspección de piezas pequeñas y complejas, acabado con pulidos finos.',
-      workArea: 'Proceso: ensamble e inspección de piezas complejas y acabados con pulidos finos. '
+      workArea: 'Proceso: ensamble e inspección de piezas complejas y acabados con pulidos finos.'
     },
     2000: {
-      visualTask: 'Alto grado de especialización en la distinción de detalles. ',
-      workArea: 'Proceso de gran exactitud. Ejecución de tareas visuales: -de bajo contraste y tamaño muy pequeño por periodos prolongados;• exactas y muy prolongadas, y • muy especiales de extremadamente bajo contraste y pequeño tamaño. '
+      visualTask: 'Alto grado de especialización en la distinción de detalles.',
+      workArea: 'Proceso de gran exactitud. Ejecución de tareas visuales: -de bajo contraste y tamaño muy pequeño por periodos prolongados; exactas y muy prolongadas, y muy especiales de extremadamente bajo contraste y pequeño tamaño.'
     },
   };
 
   const validateForm = () => {
     setErrorMessage(''); // Resetear mensaje de error
-    if (!formData.puestoTrabajador || !formData.numTrabajadores || !formData.descripcionActividades || !formData.tareaVisual) {
+    if (!formData.puestoTrabajador || !formData.numTrabajadores || !formData.descripcionActividades || !formData.nivelMinimoIluminacion) {
       setErrorMessage('Por favor, completa todos los campos obligatorios.');
       return false;
     }
@@ -59,21 +59,26 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
 
   const handleSave = () => {
     if (validateForm()) {
-      // Aquí iría la lógica de guardar datos
       console.log('Datos guardados:', formData);
     }
   };
 
   const handleNumTrabajadoresChange = (e) => {
-    const value = Math.max(0, parseInt(e.target.value, 10)); // Asegurar que el valor sea >= 0
-    handleChange({ target: { name: 'numTrabajadores', value } });
+    let value = e.target.value.replace(/^0+(?!$)/, ''); // Remover ceros iniciales excepto cuando es "0"
+    value = value === '' ? '' : Math.max(0, parseInt(value, 10)); // Asegurar que el valor sea >= 0
+    handleChange('numTrabajadores', value);
   };
 
   const handleNivelMinimoIluminacionChange = (e) => {
     const value = e.target.value;
-    handleChange(e); // Actualizar el formData con el nuevo valor
-    setDescription(illuminationDescriptions[value]?.workArea); // Establecer la descripción del área de trabajo
-    setVisualTask(illuminationDescriptions[value]?.visualTask); // Establecer la tarea visual correspondiente
+    handleChange('nivelMinimoIluminacion', value);
+    if (illuminationDescriptions[value]) {
+      setDescription(illuminationDescriptions[value].workArea); // Establecer la descripción del área de trabajo
+      setVisualTask(illuminationDescriptions[value].visualTask); // Establecer la tarea visual correspondiente
+    } else {
+      setDescription('');
+      setVisualTask('');
+    }
   };
 
   return (
@@ -98,8 +103,8 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
                 type="text"
                 id="puestoTrabajador"
                 name="puestoTrabajador"
-                value={formData.puestoTrabajador}
-                onChange={handleChange}
+                value={formData.puestoTrabajador || ''}
+                onChange={(e) => handleChange('puestoTrabajador', e.target.value)}
                 className="border p-2 rounded w-full"
                 required
               />
@@ -110,10 +115,11 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
                 type="number"
                 id="numTrabajadores"
                 name="numTrabajadores"
-                value={formData.numTrabajadores}
-                onChange={handleNumTrabajadoresChange} // Usar la función modificada
+                value={formData.numTrabajadores || ''}
+                onChange={handleNumTrabajadoresChange}
                 className="border p-2 rounded w-full"
                 required
+                min="0"
               />
             </div>
             <div>
@@ -121,8 +127,8 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
               <textarea
                 id="descripcionActividades"
                 name="descripcionActividades"
-                value={formData.descripcionActividades}
-                onChange={handleChange}
+                value={formData.descripcionActividades || ''}
+                onChange={(e) => handleChange('descripcionActividades', e.target.value)}
                 className="border p-2 rounded w-full"
                 required
               ></textarea>
@@ -132,32 +138,36 @@ const DatosPuesto = ({ formData, handleChange, visible, toggleSection }) => {
               <select
                 id="nivelMinimoIluminacion"
                 name="nivelMinimoIluminacion"
-                value={formData.nivelMinimoIluminacion}
-                onChange={handleNivelMinimoIluminacionChange} // Usar la nueva función para manejar cambios
+                value={formData.nivelMinimoIluminacion || ''}
+                onChange={handleNivelMinimoIluminacionChange}
                 className="border p-2 rounded w-full"
                 required
               >
-                <option value="20">20 lux</option>
-                <option value="50">50 lux</option>
-                <option value="100">100 lux</option>
-                <option value="200">200 lux</option>
-                <option value="300">300 lux</option>
-                <option value="500">500 lux</option>
-                <option value="750">750 lux</option>
-                <option value="1000">1000 lux</option>
-                <option value="2000">2000 lux</option>
+                <option value="">Selecciona un nivel</option>
+                {Object.keys(illuminationDescriptions).map((key) => (
+                  <option key={key} value={key}>{`${key} lux`}</option>
+                ))}
               </select>
             </div>
 
             {/* Subtítulos y descripciones */}
             <div className="mt-4">
               <h3 className="font-semibold">TAREA VISUAL DEL PUESTO DE TRABAJO:</h3>
-              <p>{visualTask}</p> {/* Mostrar tarea visual según la opción seleccionada */}
+              <p>{visualTask}</p>
             </div>
             <div className="mt-4">
               <h3 className="font-semibold">ÁREA DE TRABAJO:</h3>
-              <p>{description}</p> {/* Mostrar descripción según la opción seleccionada */}
+              <p>{description}</p>
             </div>
+          </div>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={handleSave}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Guardar Datos
+            </button>
           </div>
         </div>
       )}

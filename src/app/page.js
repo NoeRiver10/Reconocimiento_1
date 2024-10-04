@@ -1,19 +1,19 @@
-"use client"; 
+"use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link'; 
-import './globals.css'; 
+import Link from 'next/link';
+import './globals.css';
 
 import IdentificacionArea from './components/componentsPrincipal/IdentificacionArea';
-import DimensionesArea from './components/componentsPrincipal/DimensionesArea'; 
-import Luminaria from './components/componentsPrincipal/Luminaria'; 
-import PercepcionTrabajo from './components/componentsPrincipal/PercepcionTrabajo'; 
-import DatosPuesto from './components/componentsPrincipal/DatosPuesto'; 
+import DimensionesArea from './components/componentsPrincipal/DimensionesArea';
+import Luminaria from './components/componentsPrincipal/Luminaria';
+import PercepcionTrabajo from './components/componentsPrincipal/PercepcionTrabajo';
+import FormularioPuestos from './components/componentsPrincipal/FormularioPuestos';
 
 export default function Reconocimiento() {
-  const [areaCount, setAreaCount] = useState(1); 
+  const [areaCount, setAreaCount] = useState(1);
   const [formData, setFormData] = useState({
-    idArea: 1, 
+    idArea: 1,
     areaIluminada: '',
     numPuntosEvaluar: '',
     tipoIluminacion: 'ARTIFICIAL',
@@ -44,10 +44,10 @@ export default function Reconocimiento() {
     dimensiones: false,
     luminarias: false,
     percepcion: false,
-    puesto: false,
+    puestoGeneral: false, // Controla la visibilidad de la sección general de "Datos del Puesto"
   });
 
-  const [successMessage, setSuccessMessage] = useState(''); 
+  const [successMessage, setSuccessMessage] = useState('');
 
   const toggleSection = (section) => {
     setVisibleSections((prev) => ({
@@ -64,18 +64,18 @@ export default function Reconocimiento() {
   };
 
   useEffect(() => {
-    const altura = parseFloat(formData.altura) || 0; 
-    const largo = parseFloat(formData.largo) || 0; 
-    const ancho = parseFloat(formData.ancho) || 0; 
+    const altura = parseFloat(formData.altura) || 0;
+    const largo = parseFloat(formData.largo) || 0;
+    const ancho = parseFloat(formData.ancho) || 0;
 
-    let indiceArea = 0; 
-    if (altura > 0 && (largo + ancho) > 0) { 
-      indiceArea = (largo * ancho) / (altura * (largo + ancho)); 
+    let indiceArea = 0;
+    if (altura > 0 && (largo + ancho) > 0) {
+      indiceArea = (largo * ancho) / (altura * (largo + ancho));
     }
 
     setFormData((prev) => ({
       ...prev,
-      indiceArea 
+      indiceArea,
     }));
   }, [formData.altura, formData.largo, formData.ancho]);
 
@@ -92,6 +92,7 @@ export default function Reconocimiento() {
     if (ic < 3) return 20;
     return 30;
   };
+
   const validateForm = () => {
     const requiredFields = {
       areaIluminada: formData.areaIluminada,
@@ -104,67 +105,29 @@ export default function Reconocimiento() {
       tipoLuminaria: formData.tipoLuminaria,
       potencia: formData.potencia,
       cantidad: formData.cantidad,
-      puestoTrabajador: formData.puestoTrabajador,
-      numTrabajadores: formData.numTrabajadores,
-      descripcionActividades: formData.descripcionActividades,
-      nivelMinimoIluminacion: formData.nivelMinimoIluminacion,
     };
-  
+
     for (let field in requiredFields) {
       const value = requiredFields[field];
-      
       if (!value || value.toString().trim() === "") {
         console.log(`El campo '${field}' está vacío o es inválido. Valor actual: '${value}'`);
-        setSuccessMessage(`Por favor, completa el campo: ${field}`); // Mostrar mensaje específico
+        setSuccessMessage(`Por favor, completa el campo: ${field}`);
         return false;
       }
     }
-  
-    setSuccessMessage(''); // Resetear mensaje de error si pasa la validación
+
+    setSuccessMessage('');
     return true;
   };
-  
-  const handleSave = () => {
-    console.log('Valores del formulario antes de guardar:', formData); // Esto imprimirá todo el formData
-  
+
+  const handleSaveAll = () => {
     if (!validateForm()) {
       console.log('Formulario no válido, faltan campos por completar.');
       return;
     }
-  
+
     console.log('Datos guardados:', formData);
     setSuccessMessage('Guardado con éxito');
-  };
-  
-
-  const handleAddAnotherArea = () => {
-    setAreaCount((prev) => prev + 1);
-    setFormData({
-      idArea: areaCount + 1, 
-      areaIluminada: '',
-      numPuntosEvaluar: '',
-      tipoIluminacion: 'ARTIFICIAL',
-      tipoSuperficie: '',
-      altura: '',
-      largo: '',
-      ancho: '',
-      indiceArea: 0,
-      tipoLuminaria: '',
-      potencia: '',
-      distribucion: 'LINEAL',
-      iluminacionLocalizada: 'SÍ',
-      cantidad: '',
-      nombreTrabajador: '',
-      descripcion: '',
-      reportes: '',
-      tieneNombreTrabajador: 'NO',
-      puestoTrabajador: '',
-      numTrabajadores: '',
-      descripcionActividades: '',
-      tareaVisual: '',
-      nivelMinimoIluminacion: '1',
-    });
-    setSuccessMessage(''); 
   };
 
   return (
@@ -202,31 +165,35 @@ export default function Reconocimiento() {
           visible={visibleSections.percepcion}
           toggleSection={() => toggleSection('percepcion')}
         />
-        <DatosPuesto
-          formData={formData}
-          handleChange={handleChange}
-          visible={visibleSections.puesto}
-          toggleSection={() => toggleSection('puesto')}
-        />
-        <div className="flex justify-between mt-4">
+        {/* Sección desplegable para Datos del Puesto en general */}
+        <div className="mb-4">
           <button
             type="button"
-            onClick={handleAddAnotherArea}
-            className="bg-blue-500 text-white px-2 py-1 text-sm rounded">
-            Agregar Área
+            className="bg-red-500 text-white w-full px-4 py-2 rounded-lg"
+            onClick={() => toggleSection('puestoGeneral')}
+          >
+            Datos del Puesto
           </button>
+          {visibleSections.puestoGeneral && (
+            <FormularioPuestos />
+          )}
+        </div>
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={handleSaveAll}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Guardar Todos los Datos
+          </button>
+        </div>
+        <div className="mt-4 text-center">
           <Link href={{
-            pathname: '/mediciones', 
-            query: { areaIluminada: formData.areaIluminada } // Pasar el valor como parámetro de consulta
-           }}>
+            pathname: '/mediciones',
+            query: { areaIluminada: formData.areaIluminada }
+          }}>
             <button className="bg-orange-500 text-white px-4 py-2 rounded">Ir a Mediciones</button>
-            </Link>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="bg-green-500 text-white px-2 py-1 text-sm rounded">
-            Guardar
-          </button>
+          </Link>
         </div>
       </form>
     </div>
