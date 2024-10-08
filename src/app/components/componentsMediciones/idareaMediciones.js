@@ -20,7 +20,7 @@ export default function IdAreaMediciones({ formData, handleChange, toggleSection
               name="area"
               value={formData.area || ''}
               onChange={handleChange}
-              required
+              disabled
               className="border p-2 w-full rounded"
             />
           </div>

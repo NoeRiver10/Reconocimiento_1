@@ -1,12 +1,12 @@
-"use client"; 
+"use client";
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import IdAreaMediciones from '../components/componentsMediciones/idareaMediciones';
 import IluminacionMediciones from '../components/componentsMediciones/IluminacionMediciones';
 import MedicionItem from '../components/componentsMediciones/MedicionItem';
 
 export default function Mediciones() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [formData, setFormData] = useState({
     tipoIluminacion: 'ARTIFICIAL',
     cci: 'SÍ',
@@ -19,18 +19,22 @@ export default function Mediciones() {
   // Incluye "areaIluminada" en el estado visibleSections
   const [visibleSections, setVisibleSections] = useState({
     iluminacion: false,
-    areaIluminada: false, // Añadido para controlar la visibilidad del componente IdAreaMediciones
+    areaIluminada: false,
     medicion: true,
   });
 
+  const [currentMedicionIndex, setCurrentMedicionIndex] = useState(0);
+
   useEffect(() => {
-    const areaIluminada = router.query?.areaIluminada || '';
-    console.log('router.query:', router.query);
+    // Obtener el valor de "areaIluminada" desde los parámetros de la URL
+    const areaIluminada = searchParams.get('areaIluminada') || '';
     console.log('Área iluminada antes de establecer:', areaIluminada);
+
     if (areaIluminada) {
+      // Establecer el valor de "area" en el estado formData
       setFormData((prev) => ({ ...prev, area: areaIluminada }));
     }
-  }, [router.query]);
+  }, [searchParams]);
 
   // Alternar la visibilidad de las secciones
   const toggleSection = (section) => {
@@ -46,22 +50,29 @@ export default function Mediciones() {
     setFormData({ ...formData, [name]: value });
   };
 
-  // Agregar una nueva medición
-  const addMedicion = () => {
-    const newMedicion = { puesto: '', identificacion: '', horario: '', e1: '', e2: '' };
-    setFormData((prev) => ({ ...prev, mediciones: [...prev.mediciones, newMedicion] }));
+  // Manejar cambios en una medición específica
+  const handleMedicionChange = (index, field, value) => {
+    const newMediciones = [...formData.mediciones];
+    newMediciones[index] = {
+      ...newMediciones[index],
+      [field]: value,
+    };
+    setFormData({ ...formData, mediciones: newMediciones });
   };
 
-// Manejar cambios en una medición específica
-const handleMedicionChange = (index, field, value) => {
-  const newMediciones = [...formData.mediciones];
-  newMediciones[index] = {
-    ...newMediciones[index],
-    [field]: value,
+  // Navegar al siguiente punto de medición
+  const siguientePunto = () => {
+    if (currentMedicionIndex < parseInt(formData.numeroPuntos || 0, 10) - 1) {
+      setCurrentMedicionIndex(currentMedicionIndex + 1);
+    }
   };
-  setFormData({ ...formData, mediciones: newMediciones });
-};
 
+  // Navegar al punto de medición anterior
+  const anteriorPunto = () => {
+    if (currentMedicionIndex > 0) {
+      setCurrentMedicionIndex(currentMedicionIndex - 1);
+    }
+  };
 
   return (
     <div className="container mx-auto p-4 bg-white dark:bg-gray-900 max-w-3xl rounded-lg shadow-lg">
@@ -80,27 +91,38 @@ const handleMedicionChange = (index, field, value) => {
           formData={formData}
           handleChange={handleChange}
           toggleSection={toggleSection}
-          visibleSections={visibleSections} // Pasar visibleSections aquí también
+          visibleSections={visibleSections}
         />
 
-        {/* Mostrar tantas mediciones como el número de puntos ingresado */}
-        {Array.from({ length: parseInt(formData.numeroPuntos || 0, 10) }).map((_, index) => (
+        {/* Mostrar solo un punto de medición a la vez */}
+        {formData.numeroPuntos > 0 && (
           <MedicionItem
-            key={index}
-            index={index}
+            key={currentMedicionIndex}
+            index={currentMedicionIndex}
             formData={formData}
             handleMedicionChange={handleMedicionChange}
           />
-        ))}
+        )}
 
-        {/* Botón para agregar más mediciones */}
-        <button
-          type="button"
-          onClick={addMedicion}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Agregar Medición
-        </button>
+        {/* Botones para navegar entre puntos de medición */}
+        <div className="flex justify-between mt-4">
+          <button
+            type="button"
+            onClick={anteriorPunto}
+            className="bg-gray-500 text-white px-4 py-2 rounded"
+            disabled={currentMedicionIndex === 0}
+          >
+            Anterior Punto
+          </button>
+          <button
+            type="button"
+            onClick={siguientePunto}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+            disabled={currentMedicionIndex >= parseInt(formData.numeroPuntos || 0, 10) - 1}
+          >
+            Siguiente Punto
+          </button>
+        </div>
       </form>
     </div>
   );

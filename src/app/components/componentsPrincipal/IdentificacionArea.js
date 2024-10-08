@@ -47,7 +47,7 @@ const IdentificacionArea = ({ formData, handleChange, visible, toggleSection }) 
                 name="idArea"
                 value={formData.idArea}
                 onChange={handleChange}
-                required
+                disabled
                 className="border p-2 rounded w-full"
               />
             </div>
