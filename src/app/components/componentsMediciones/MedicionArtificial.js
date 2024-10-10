@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 function MedicionArtificial({ index, formData, handleMedicionChange, calcularHorarioConsecutivo }) {
-  // Manejar los cambios de los campos de medición específicos
+  // Manejar los cambios de los campos de medicion especificos
   const handleFieldChange = (field, value) => {
     handleMedicionChange(index, field, value);
   };
@@ -11,7 +11,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
       const newHorario = calculateConsecutiveHorario();
       handleFieldChange('horario_0', newHorario);
     }
-  }, [index, calcularHorarioConsecutivo, formData]); // Añadido formData a las dependencias
+  }, [index, calcularHorarioConsecutivo]);
 
   const calculateConsecutiveHorario = () => {
     if (index === 0) {
@@ -37,11 +37,15 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
       newHours = (newHours + 1) % 24;
     }
 
-    // Formatear el nuevo horario con dos dígitos para las horas y minutos
+    // Formatear el nuevo horario con dos digitos para las horas y minutos
     const formattedHours = String(newHours).padStart(2, '0');
     const formattedMinutes = String(newMinutes).padStart(2, '0');
 
     return `${formattedHours}:${formattedMinutes}`;
+  };
+
+  const handleSaveMedicion = () => {
+    console.log('Medicion guardada:', formData.mediciones[index]);
   };
 
   return (
@@ -56,19 +60,19 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           name="puesto"
           value={formData.mediciones[index]?.puesto || ''}
           onChange={(e) => handleFieldChange('puesto', e.target.value)}
-          className="border p-2 w-full rounded"
+          className="border p-2 w-full rounded bg-white"
         />
       </div>
 
-      {/* Campo de Identificación, editable por el usuario */}
+      {/* Campo de Identificacion, editable por el usuario */}
       <div className="mb-4">
-        <label className="block mb-1">IDENTIFICACIÓN:</label>
+        <label className="block mb-1">IDENTIFICACION:</label>
         <input
           type="text"
           name="identificacion"
           value={formData.mediciones[index]?.identificacion || ''}
           onChange={(e) => handleFieldChange('identificacion', e.target.value)}
-          className="border p-2 w-full rounded"
+          className="border p-2 w-full rounded bg-white"
           required
         />
       </div>
@@ -81,7 +85,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           name="horario_0"
           value={formData.mediciones[index]?.['horario_0'] || ''}
           onChange={(e) => handleFieldChange('horario_0', e.target.value)}
-          className={`border p-2 w-full rounded ${calcularHorarioConsecutivo && index > 0 ? 'bg-gray-200 cursor-not-allowed' : ''}`}
+          className={`border p-2 w-full rounded ${calcularHorarioConsecutivo && index > 0 ? 'bg-gray-200 cursor-not-allowed' : 'bg-white'}`}
           required
           readOnly={calcularHorarioConsecutivo && index > 0}
         />
@@ -95,7 +99,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           name="e1"
           value={formData.mediciones[index]?.e1 || ''}
           onChange={(e) => handleFieldChange('e1', e.target.value)}
-          className="border p-2 w-full rounded"
+          className="border p-2 w-full rounded bg-white"
           required
         />
       </div>
@@ -108,9 +112,20 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           name="e2"
           value={formData.mediciones[index]?.e2 || ''}
           onChange={(e) => handleFieldChange('e2', e.target.value)}
-          className="border p-2 w-full rounded"
+          className="border p-2 w-full rounded bg-white"
           required
         />
+      </div>
+
+      {/* Boton para guardar la medicion */}
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          onClick={handleSaveMedicion}
+        >
+          Guardar Medicion
+        </button>
       </div>
     </div>
   );

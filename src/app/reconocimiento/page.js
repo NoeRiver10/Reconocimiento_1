@@ -9,33 +9,67 @@ import PercepcionTrabajo from '../components/componentsPrincipal/PercepcionTraba
 import FormularioPuestos from '../components/componentsPrincipal/FormularioPuestos';
 
 export default function Reconocimiento() {
-  const [areas, setAreas] = useState([
-    {
-      idArea: 1,
-      areaIluminada: '',
-      numPuntosEvaluar: '',
-      tipoIluminacion: 'ARTIFICIAL',
-      tipoSuperficie: '',
-      altura: '',
-      largo: '',
-      ancho: '',
-      indiceArea: 0,
-      tipoLuminaria: '',
-      potencia: '',
-      distribucion: 'LINEAL',
-      iluminacionLocalizada: 'SÍ',
-      cantidad: '',
-      nombreTrabajador: '',
-      descripcion: '',
-      reportes: '',
-      puestoTrabajador: '',
-      numTrabajadores: '',
-      descripcionActividades: '',
-      tareaVisual: '',
-      nivelMinimoIluminacion: '1',
-      descripcionSuperficie: '', // Asegúrate de incluir este campo también
-    },
-  ]);
+  const [areas, setAreas] = useState(() => {
+    // Recuperar áreas del localStorage si existen
+    if (typeof window !== 'undefined') {
+      const savedAreas = localStorage.getItem('areas');
+      return savedAreas ? JSON.parse(savedAreas) : [
+        {
+          idArea: 1,
+          areaIluminada: '',
+          numPuntosEvaluar: '',
+          tipoIluminacion: 'ARTIFICIAL',
+          tipoSuperficie: '',
+          altura: '',
+          largo: '',
+          ancho: '',
+          indiceArea: 0,
+          tipoLuminaria: '',
+          potencia: '',
+          distribucion: 'LINEAL',
+          iluminacionLocalizada: 'SÍ',
+          cantidad: '',
+          nombreTrabajador: '',
+          descripcion: '',
+          reportes: '',
+          puestoTrabajador: '',
+          numTrabajadores: '',
+          descripcionActividades: '',
+          tareaVisual: '',
+          nivelMinimoIluminacion: '1',
+          descripcionSuperficie: '',
+        },
+      ];
+    } else {
+      return [
+        {
+          idArea: 1,
+          areaIluminada: '',
+          numPuntosEvaluar: '',
+          tipoIluminacion: 'ARTIFICIAL',
+          tipoSuperficie: '',
+          altura: '',
+          largo: '',
+          ancho: '',
+          indiceArea: 0,
+          tipoLuminaria: '',
+          potencia: '',
+          distribucion: 'LINEAL',
+          iluminacionLocalizada: 'SÍ',
+          cantidad: '',
+          nombreTrabajador: '',
+          descripcion: '',
+          reportes: '',
+          puestoTrabajador: '',
+          numTrabajadores: '',
+          descripcionActividades: '',
+          tareaVisual: '',
+          nivelMinimoIluminacion: '1',
+          descripcionSuperficie: '',
+        },
+      ];
+    }
+  });
 
   const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
   const [visibleSections, setVisibleSections] = useState({
@@ -46,6 +80,13 @@ export default function Reconocimiento() {
     puestoGeneral: false,
   });
   const [successMessage, setSuccessMessage] = useState('');
+
+  useEffect(() => {
+    // Guardar áreas en localStorage cada vez que cambien
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('areas', JSON.stringify(areas));
+    }
+  }, [areas]);
 
   const addArea = () => {
     if (!validateForm()) {
@@ -105,6 +146,10 @@ export default function Reconocimiento() {
       };
       return updatedAreas;
     });
+  };
+
+  const handleAreaSelect = (selectedAreaId) => {
+    setCurrentAreaIndex(areas.findIndex((area) => area.idArea === parseInt(selectedAreaId)));
   };
 
   useEffect(() => {

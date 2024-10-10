@@ -1,22 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function InformacionGeneralForm() {
   // Estado para almacenar los valores del formulario
   const [formData, setFormData] = useState({
+    ordenServicio: '',
     idInforme: '',
     empresa: '',
     rfc: '',
     telefono: '',
     giroEmpresa: '',
+    horariosTrabajo: '',
+    cargoDirigido: '',
     representanteLegal: '',
     direccion: '',
-    tecnicoRealizo: '',
     fechaReconocimiento: '',
     fechaMuestreoInicial: '',
     fechaElaboracionReporte: '',
   });
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Manejador para los cambios en los inputs
   const handleChange = (e) => {
@@ -25,6 +29,20 @@ export default function InformacionGeneralForm() {
       ...prevData,
       [name]: value,
     }));
+  };
+
+  // Manejador para guardar la información
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Verificar si todos los campos están llenos
+    for (let key in formData) {
+      if (formData[key] === '') {
+        setErrorMessage(`Por favor, completa el campo: ${key}`);
+        return;
+      }
+    }
+    setErrorMessage('');
+    console.log('Información guardada:', formData);
   };
 
   return (
@@ -37,8 +55,23 @@ export default function InformacionGeneralForm() {
       </button>
       <div className="bg-gray-100 p-8 rounded-lg shadow-md dark:bg-gray-800">
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800 dark:text-white">Formulario de Información General</h2>
-        <form className="space-y-6">
+        {errorMessage && (
+          <div className="mb-4 p-4 bg-red-500 text-white rounded">
+            {errorMessage}
+          </div>
+        )}
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block font-bold text-gray-700 dark:text-white">Orden de Servicio</label>
+              <input
+                type="text"
+                name="ordenServicio"
+                value={formData.ordenServicio}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              />
+            </div>
             <div>
               <label className="block font-bold text-gray-700 dark:text-white">ID Informe</label>
               <input
@@ -90,6 +123,26 @@ export default function InformacionGeneralForm() {
               />
             </div>
             <div>
+              <label className="block font-bold text-gray-700 dark:text-white">Horarios de Trabajo</label>
+              <input
+                type="text"
+                name="horariosTrabajo"
+                value={formData.horariosTrabajo}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div>
+              <label className="block font-bold text-gray-700 dark:text-white">Informe dirigido a (CARGO 1)</label>
+              <input
+                type="text"
+                name="cargoDirigido"
+                value={formData.cargoDirigido}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+            <div>
               <label className="block font-bold text-gray-700 dark:text-white">Representante Legal</label>
               <input
                 type="text"
@@ -105,16 +158,6 @@ export default function InformacionGeneralForm() {
                 type="text"
                 name="direccion"
                 value={formData.direccion}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-lg"
-              />
-            </div>
-            <div>
-              <label className="block font-bold text-gray-700 dark:text-white">Técnico Realizó</label>
-              <input
-                type="text"
-                name="tecnicoRealizo"
-                value={formData.tecnicoRealizo}
                 onChange={handleChange}
                 className="w-full p-3 border border-gray-300 rounded-lg"
               />
@@ -156,6 +199,18 @@ export default function InformacionGeneralForm() {
             </button>
           </div>
         </form>
+        <div className="mt-4 flex justify-between">
+          <Link href="/" passHref>
+            <button className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition duration-300">
+              Página Principal
+            </button>
+          </Link>
+          <Link href="/reconocimiento" passHref>
+            <button className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300">
+              Ir a Reconocimiento
+            </button>
+          </Link>
+        </div>
       </div>
     </div>
   );

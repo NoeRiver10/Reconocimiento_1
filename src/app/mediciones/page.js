@@ -7,6 +7,7 @@ import MedicionItem from '../components/componentsMediciones/MedicionItem';
 
 export default function Mediciones() {
   const searchParams = useSearchParams();
+  const [areas, setAreas] = useState([]);
   const [formData, setFormData] = useState({
     tipoIluminacion: 'ARTIFICIAL',
     cci: 'SÍ',
@@ -34,6 +35,14 @@ export default function Mediciones() {
       // Establecer el valor de "area" en el estado formData
       setFormData((prev) => ({ ...prev, area: areaIluminada }));
     }
+
+    // Recuperar las áreas del localStorage cuando se monte el componente
+    if (typeof window !== 'undefined') {
+      const savedAreas = window.localStorage.getItem('areas');
+      if (savedAreas) {
+        setAreas(JSON.parse(savedAreas));
+      }
+    }
   }, [searchParams]);
 
   // Alternar la visibilidad de las secciones
@@ -48,6 +57,17 @@ export default function Mediciones() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  // Manejar cambios en la selección del área
+  const handleAreaSelect = (selectedAreaId) => {
+    const selectedArea = areas.find((area) => area.idArea === parseInt(selectedAreaId));
+    if (selectedArea) {
+      setFormData((prev) => ({
+        ...prev,
+        area: selectedArea.areaIluminada,
+      }));
+    }
   };
 
   // Manejar cambios en una medición específica
@@ -84,6 +104,8 @@ export default function Mediciones() {
           handleChange={handleChange}
           toggleSection={toggleSection}
           visibleSections={visibleSections}
+          areas={areas} // Pasar las áreas al componente
+          handleAreaSelect={handleAreaSelect} // Pasar handleAreaSelect al componente
         />
 
         {/* Componente para el área y el departamento */}
