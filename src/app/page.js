@@ -46,7 +46,7 @@ export default function Home() {
         } md:relative md:translate-x-0 md:w-64`}
       >
         <div className="mb-8">
-          <Image src="/lictus-logo-1.png" alt="Logo" width={100} height={100} />
+        <Image src="/lictus-logo-1.png" alt="Logo" width={100} height={100} />
         </div>
         <nav>
           <ul className="space-y-4">

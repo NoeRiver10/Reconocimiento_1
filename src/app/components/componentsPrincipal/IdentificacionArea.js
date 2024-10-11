@@ -104,3 +104,4 @@ const IdentificacionArea = ({ formData, handleChange, visible, toggleSection }) 
 };
 
 export default IdentificacionArea;
+

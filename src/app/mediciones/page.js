@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import IdAreaMediciones from '../components/componentsMediciones/idareaMediciones';
 import IluminacionMediciones from '../components/componentsMediciones/IluminacionMediciones';
@@ -17,7 +17,6 @@ export default function Mediciones() {
     mediciones: [],
   });
 
-  // Incluye "areaIluminada" en el estado visibleSections
   const [visibleSections, setVisibleSections] = useState({
     iluminacion: false,
     areaIluminada: false,
@@ -25,18 +24,17 @@ export default function Mediciones() {
   });
 
   const [currentMedicionIndex, setCurrentMedicionIndex] = useState(0);
+  const [showSummary, setShowSummary] = useState(false);
+  const [selectedAreaId, setSelectedAreaId] = useState('');
 
   useEffect(() => {
-    // Obtener el valor de "areaIluminada" desde los parámetros de la URL
     const areaIluminada = searchParams.get('areaIluminada') || '';
     console.log('Área iluminada antes de establecer:', areaIluminada);
 
     if (areaIluminada) {
-      // Establecer el valor de "area" en el estado formData
       setFormData((prev) => ({ ...prev, area: areaIluminada }));
     }
 
-    // Recuperar las áreas del localStorage cuando se monte el componente
     if (typeof window !== 'undefined') {
       const savedAreas = window.localStorage.getItem('areas');
       if (savedAreas) {
@@ -45,7 +43,6 @@ export default function Mediciones() {
     }
   }, [searchParams]);
 
-  // Alternar la visibilidad de las secciones
   const toggleSection = (section) => {
     setVisibleSections((prev) => ({
       ...prev,
@@ -53,99 +50,218 @@ export default function Mediciones() {
     }));
   };
 
-  // Manejar cambios en los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Manejar cambios en la selección del área
   const handleAreaSelect = (selectedAreaId) => {
     const selectedArea = areas.find((area) => area.idArea === parseInt(selectedAreaId));
     if (selectedArea) {
       setFormData((prev) => ({
         ...prev,
         area: selectedArea.areaIluminada,
+        departamento: selectedArea.departamento || '',
+        numeroPuntos: selectedArea.numPuntosEvaluar || '',
+        tipoIluminacion: selectedArea.tipoIluminacion || 'ARTIFICIAL',
+        cci: selectedArea.cci || 'SÍ',
+        mediciones: selectedArea.mediciones || [],
       }));
     }
   };
 
-  // Manejar cambios en una medición específica
   const handleMedicionChange = (index, field, value) => {
     const newMediciones = [...formData.mediciones];
-    newMediciones[index] = {
-      ...newMediciones[index],
-      [field]: value,
-    };
+    if (!newMediciones[index]) {
+      newMediciones[index] = { mediciones: [] };
+    }
+    if (typeof newMediciones[index] === 'object' && !Array.isArray(newMediciones[index])) {
+      newMediciones[index][field] = value;
+    }
     setFormData({ ...formData, mediciones: newMediciones });
   };
 
-  // Navegar al siguiente punto de medición
+  const handleSaveMediciones = () => {
+    const updatedAreas = areas.map((area) => {
+      if (area.areaIluminada === formData.area) {
+        return {
+          ...area,
+          mediciones: formData.mediciones,
+          departamento: formData.departamento,
+          numPuntosEvaluar: formData.numeroPuntos,
+        };
+      }
+      return area;
+    });
+
+    setAreas(updatedAreas);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('areas', JSON.stringify(updatedAreas));
+    }
+    setShowSummary(true);
+  };
+
   const siguientePunto = () => {
     if (currentMedicionIndex < parseInt(formData.numeroPuntos || 0, 10) - 1) {
       setCurrentMedicionIndex(currentMedicionIndex + 1);
     }
   };
 
-  // Navegar al punto de medición anterior
   const anteriorPunto = () => {
     if (currentMedicionIndex > 0) {
       setCurrentMedicionIndex(currentMedicionIndex - 1);
     }
   };
 
+  const handleSummaryAreaSelect = (e) => {
+    setSelectedAreaId(e.target.value);
+  };
+
   return (
     <div className="container mx-auto p-4 bg-white dark:bg-gray-900 max-w-3xl rounded-lg shadow-lg">
       <h1 className="text-2xl font-bold mb-4 text-black dark:text-white text-center">MEDICIONES</h1>
-      <form className="space-y-4">
-        {/* Componente para la iluminación */}
-        <IluminacionMediciones
-          formData={formData}
-          handleChange={handleChange}
-          toggleSection={toggleSection}
-          visibleSections={visibleSections}
-          areas={areas} // Pasar las áreas al componente
-          handleAreaSelect={handleAreaSelect} // Pasar handleAreaSelect al componente
-        />
-
-        {/* Componente para el área y el departamento */}
-        <IdAreaMediciones
-          formData={formData}
-          handleChange={handleChange}
-          toggleSection={toggleSection}
-          visibleSections={visibleSections}
-        />
-
-        {/* Mostrar solo un punto de medición a la vez */}
-        {formData.numeroPuntos > 0 && (
-          <MedicionItem
-            key={currentMedicionIndex}
-            index={currentMedicionIndex}
+      {!showSummary ? (
+        <form className="space-y-4">
+          <IluminacionMediciones
             formData={formData}
-            handleMedicionChange={handleMedicionChange}
+            handleChange={handleChange}
+            toggleSection={toggleSection}
+            visibleSections={visibleSections}
+            areas={areas}
+            handleAreaSelect={handleAreaSelect} // Pasar la función handleAreaSelect como prop
           />
-        )}
 
-        {/* Botones para navegar entre puntos de medición */}
-        <div className="flex justify-between mt-4">
-          <button
-            type="button"
-            onClick={anteriorPunto}
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-            disabled={currentMedicionIndex === 0}
-          >
-            Anterior Punto
-          </button>
-          <button
-            type="button"
-            onClick={siguientePunto}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-            disabled={currentMedicionIndex >= parseInt(formData.numeroPuntos || 0, 10) - 1}
-          >
-            Siguiente Punto
-          </button>
+          <IdAreaMediciones
+            formData={formData}
+            handleChange={handleChange}
+            toggleSection={toggleSection}
+            visibleSections={visibleSections}
+          />
+
+          {formData.numeroPuntos > 0 && (
+            <MedicionItem
+              key={currentMedicionIndex}
+              index={currentMedicionIndex}
+              formData={formData}
+              handleMedicionChange={handleMedicionChange}
+            />
+          )}
+
+          <div className="flex justify-between mt-4">
+            <button
+              type="button"
+              onClick={anteriorPunto}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+              disabled={currentMedicionIndex === 0}
+            >
+              Anterior Punto
+            </button>
+            <button
+              type="button"
+              onClick={siguientePunto}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+              disabled={currentMedicionIndex >= parseInt(formData.numeroPuntos || 0, 10) - 1}
+            >
+              Siguiente Punto
+            </button>
+          </div>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={handleSaveMediciones}
+              className="bg-purple-500 text-white px-4 py-2 rounded"
+            >
+              Resumen de Mediciones
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="bg-gray-100 p-4 rounded-lg dark:bg-gray-800">
+          <h2 className="text-2xl font-bold mb-4 text-center">Resumen Completo</h2>
+          <div className="mb-4">
+            <label className="block mb-1 text-center">Seleccionar Área para Ver Detalles:</label>
+            <select
+              value={selectedAreaId}
+              onChange={handleSummaryAreaSelect}
+              className="border p-2 w-full rounded"
+            >
+              <option value="">Selecciona un área</option>
+              {areas.map((area) => (
+                <option key={area.idArea} value={area.idArea}>
+                  Área {area.idArea} - {area.areaIluminada || 'Sin nombre'}
+                </option>
+              ))}
+            </select>
+          </div>
+          {selectedAreaId && (
+            <div className="border-b border-gray-400 mb-4 pb-4">
+              {areas
+                .filter((area) => area.idArea === parseInt(selectedAreaId))
+                .map((area, index) => (
+                  <div key={index}>
+                    <h3 className="text-xl font-semibold mb-2">Área {area.idArea}</h3>
+                    <p><strong>Área Iluminada:</strong> {area.areaIluminada}</p>
+                    <p><strong>Número de Puntos a Evaluar:</strong> {area.numPuntosEvaluar}</p>
+                    <p><strong>Tipo de Iluminación:</strong> {area.tipoIluminacion}</p>
+                    <p><strong>Tipo de Superficie:</strong> {area.tipoSuperficie}</p>
+                    <p><strong>Dimensiones:</strong> Altura: {area.altura}, Largo: {area.largo}, Ancho: {area.ancho}</p>
+                    <p><strong>Índice de Área:</strong> {area.indiceArea}</p>
+                    <p><strong>Tipo de Luminaria:</strong> {area.tipoLuminaria}</p>
+                    <p><strong>Potencia:</strong> {area.potencia}</p>
+                    <p><strong>Distribución:</strong> {area.distribucion}</p>
+                    <p><strong>Iluminación Localizada:</strong> {area.iluminacionLocalizada}</p>
+                    <p><strong>Cantidad:</strong> {area.cantidad}</p>
+                    <p><strong>Nombre del Trabajador:</strong> {area.nombreTrabajador}</p>
+                    <p><strong>Descripción:</strong> {area.descripcion}</p>
+                    <p><strong>Reportes:</strong> {area.reportes}</p>
+                    <p><strong>Puesto del Trabajador:</strong> {area.puestoTrabajador}</p>
+                    <p><strong>Número de Trabajadores:</strong> {area.numTrabajadores}</p>
+                    <p><strong>Descripción de Actividades:</strong> {area.descripcionActividades}</p>
+                    <p><strong>Tarea Visual:</strong> {area.tareaVisual}</p>
+                    <p><strong>Nivel Mínimo de Iluminación:</strong> {area.nivelMinimoIluminacion}</p>
+                    <p><strong>Descripción de la Superficie:</strong> {area.descripcionSuperficie}</p>
+
+                    <div className="mt-4">
+                      <h4 className="text-lg font-semibold">Mediciones:</h4>
+                      {area.mediciones && area.mediciones.length > 0 ? (
+                        area.mediciones.map((medicion, idx) => (
+                          <div key={idx} className="mb-2 p-2 border rounded-lg">
+                            <h5 className="font-bold">Medición {idx + 1}</h5>
+                            {Array.isArray(medicion.mediciones) ? (
+                              medicion.mediciones.map((subMedicion, subIdx) => (
+                                <div key={subIdx} className="ml-4">
+                                  {Object.entries(subMedicion).map(([key, value]) => (
+                                    <p key={key}><strong>{key}:</strong> {value}</p>
+                                  ))}
+                                </div>
+                              ))
+                            ) : (
+                              Object.entries(medicion).map(([key, value]) => (
+                                <p key={key}><strong>{key}:</strong> {value}</p>
+                              ))
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p>No hay mediciones disponibles</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setShowSummary(false)}
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Volver a la Edición
+            </button>
+          </div>
         </div>
-      </form>
+      )}
     </div>
   );
 }
