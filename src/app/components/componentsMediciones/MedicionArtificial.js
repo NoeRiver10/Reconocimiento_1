@@ -1,8 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 function MedicionArtificial({ index, formData, handleMedicionChange, calcularHorarioConsecutivo }) {
+  const [medicion, setMedicion] = useState(formData.mediciones[index] || {});
+
   // Manejar los cambios de los campos de medicion especificos
   const handleFieldChange = (field, value) => {
+    const updatedMedicion = { ...medicion, [field]: value };
+    setMedicion(updatedMedicion);
     handleMedicionChange(index, field, value);
   };
 
@@ -12,6 +16,13 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
       handleFieldChange('horario_0', newHorario);
     }
   }, [index, calcularHorarioConsecutivo]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`medicion_${index}`, JSON.stringify(medicion));
+      console.log('Medicion guardada en localStorage:', medicion);
+    }
+  }, [medicion]);
 
   const calculateConsecutiveHorario = () => {
     if (index === 0) {
@@ -45,7 +56,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
   };
 
   const handleSaveMedicion = () => {
-    console.log('Medicion guardada:', formData.mediciones[index]);
+    console.log('Medicion guardada:', medicion);
   };
 
   return (
@@ -58,7 +69,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
         <input
           type="text"
           name="puesto"
-          value={formData.mediciones[index]?.puesto || ''}
+          value={medicion.puesto || ''}
           onChange={(e) => handleFieldChange('puesto', e.target.value)}
           className="border p-2 w-full rounded bg-white"
         />
@@ -70,7 +81,7 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
         <input
           type="text"
           name="identificacion"
-          value={formData.mediciones[index]?.identificacion || ''}
+          value={medicion.identificacion || ''}
           onChange={(e) => handleFieldChange('identificacion', e.target.value)}
           className="border p-2 w-full rounded bg-white"
           required
@@ -83,35 +94,33 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
         <input
           type="time"
           name="horario_0"
-          value={formData.mediciones[index]?.['horario_0'] || ''}
+          value={medicion['horario_0'] || ''}
           onChange={(e) => handleFieldChange('horario_0', e.target.value)}
           className={`border p-2 w-full rounded ${calcularHorarioConsecutivo && index > 0 ? 'bg-gray-200 cursor-not-allowed' : 'bg-white'}`}
           required
           readOnly={calcularHorarioConsecutivo && index > 0}
         />
       </div>
-
-      {/* Campo E1 */}
-      <div className="mb-4">
-        <label className="block mb-1">E1:</label>
-        <input
-          type="number"
-          name="e1"
-          value={formData.mediciones[index]?.e1 || ''}
-          onChange={(e) => handleFieldChange('e1', e.target.value)}
-          className="border p-2 w-full rounded bg-white"
-          required
-        />
-      </div>
-
       {/* Campo E2 */}
       <div className="mb-4">
         <label className="block mb-1">E2:</label>
         <input
           type="number"
           name="e2"
-          value={formData.mediciones[index]?.e2 || ''}
+          value={medicion.e2 || ''}
           onChange={(e) => handleFieldChange('e2', e.target.value)}
+          className="border p-2 w-full rounded bg-white"
+          required
+        />
+      </div>
+      {/* Campo E1 */}
+      <div className="mb-4">
+        <label className="block mb-1">E1:</label>
+        <input
+          type="number"
+          name="e1"
+          value={medicion.e1 || ''}
+          onChange={(e) => handleFieldChange('e1', e.target.value)}
           className="border p-2 w-full rounded bg-white"
           required
         />

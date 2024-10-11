@@ -4,6 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import IdAreaMediciones from '../components/componentsMediciones/idareaMediciones';
 import IluminacionMediciones from '../components/componentsMediciones/IluminacionMediciones';
 import MedicionItem from '../components/componentsMediciones/MedicionItem';
+import MedicionCombinada from '../components/componentsMediciones/MedicionCombinada';
+import MedicionArtificial from '../components/componentsMediciones/MedicionArtificial';
 
 export default function Mediciones() {
   const searchParams = useSearchParams();
@@ -139,12 +141,22 @@ export default function Mediciones() {
           />
 
           {formData.numeroPuntos > 0 && (
-            <MedicionItem
-              key={currentMedicionIndex}
-              index={currentMedicionIndex}
-              formData={formData}
-              handleMedicionChange={handleMedicionChange}
-            />
+            formData.tipoIluminacion === 'COMBINADA' ? (
+              <MedicionCombinada
+                key={currentMedicionIndex}
+                index={currentMedicionIndex}
+                formData={formData}
+                handleMedicionChange={handleMedicionChange}
+                calcularHorarioConsecutivo={true}
+              />
+            ) : (
+              <MedicionArtificial
+                key={currentMedicionIndex}
+                index={currentMedicionIndex}
+                formData={formData}
+                handleMedicionChange={handleMedicionChange}
+              />
+            )
           )}
 
           <div className="flex justify-between mt-4">
@@ -195,60 +207,108 @@ export default function Mediciones() {
             </select>
           </div>
           {selectedAreaId && (
-            <div className="border-b border-gray-400 mb-4 pb-4">
-              {areas
-                .filter((area) => area.idArea === parseInt(selectedAreaId))
-                .map((area, index) => (
-                  <div key={index}>
-                    <h3 className="text-xl font-semibold mb-2">Área {area.idArea}</h3>
-                    <p><strong>Área Iluminada:</strong> {area.areaIluminada}</p>
-                    <p><strong>Número de Puntos a Evaluar:</strong> {area.numPuntosEvaluar}</p>
-                    <p><strong>Tipo de Iluminación:</strong> {area.tipoIluminacion}</p>
-                    <p><strong>Tipo de Superficie:</strong> {area.tipoSuperficie}</p>
-                    <p><strong>Dimensiones:</strong> Altura: {area.altura}, Largo: {area.largo}, Ancho: {area.ancho}</p>
-                    <p><strong>Índice de Área:</strong> {area.indiceArea}</p>
-                    <p><strong>Tipo de Luminaria:</strong> {area.tipoLuminaria}</p>
-                    <p><strong>Potencia:</strong> {area.potencia}</p>
-                    <p><strong>Distribución:</strong> {area.distribucion}</p>
-                    <p><strong>Iluminación Localizada:</strong> {area.iluminacionLocalizada}</p>
-                    <p><strong>Cantidad:</strong> {area.cantidad}</p>
-                    <p><strong>Nombre del Trabajador:</strong> {area.nombreTrabajador}</p>
-                    <p><strong>Descripción:</strong> {area.descripcion}</p>
-                    <p><strong>Reportes:</strong> {area.reportes}</p>
-                    <p><strong>Puesto del Trabajador:</strong> {area.puestoTrabajador}</p>
-                    <p><strong>Número de Trabajadores:</strong> {area.numTrabajadores}</p>
-                    <p><strong>Descripción de Actividades:</strong> {area.descripcionActividades}</p>
-                    <p><strong>Tarea Visual:</strong> {area.tareaVisual}</p>
-                    <p><strong>Nivel Mínimo de Iluminación:</strong> {area.nivelMinimoIluminacion}</p>
-                    <p><strong>Descripción de la Superficie:</strong> {area.descripcionSuperficie}</p>
-
-                    <div className="mt-4">
-                      <h4 className="text-lg font-semibold">Mediciones:</h4>
-                      {area.mediciones && area.mediciones.length > 0 ? (
-                        area.mediciones.map((medicion, idx) => (
-                          <div key={idx} className="mb-2 p-2 border rounded-lg">
-                            <h5 className="font-bold">Medición {idx + 1}</h5>
-                            {Array.isArray(medicion.mediciones) ? (
-                              medicion.mediciones.map((subMedicion, subIdx) => (
-                                <div key={subIdx} className="ml-4">
-                                  {Object.entries(subMedicion).map(([key, value]) => (
-                                    <p key={key}><strong>{key}:</strong> {value}</p>
-                                  ))}
-                                </div>
-                              ))
-                            ) : (
-                              Object.entries(medicion).map(([key, value]) => (
-                                <p key={key}><strong>{key}:</strong> {value}</p>
-                              ))
-                            )}
-                          </div>
-                        ))
-                      ) : (
-                        <p>No hay mediciones disponibles</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white dark:bg-gray-700">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border-b">Campo</th>
+                    <th className="py-2 px-4 border-b">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {areas
+                    .filter((area) => area.idArea === parseInt(selectedAreaId))
+                    .map((area, index) => (
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Área Iluminada</td>
+                          <td className="py-2 px-4 border-b">{area.areaIluminada}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Número de Puntos a Evaluar</td>
+                          <td className="py-2 px-4 border-b">{area.numPuntosEvaluar}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Tipo de Iluminación</td>
+                          <td className="py-2 px-4 border-b">{area.tipoIluminacion}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Dimensiones</td>
+                          <td className="py-2 px-4 border-b">Altura: {area.altura}, Largo: {area.largo}, Ancho: {area.ancho}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Índice de Área</td>
+                          <td className="py-2 px-4 border-b">{area.indiceArea}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Tipo de Luminaria</td>
+                          <td className="py-2 px-4 border-b">{area.tipoLuminaria}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Potencia</td>
+                          <td className="py-2 px-4 border-b">{area.potencia}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Distribución</td>
+                          <td className="py-2 px-4 border-b">{area.distribucion}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Iluminación Localizada</td>
+                          <td className="py-2 px-4 border-b">{area.iluminacionLocalizada}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Cantidad</td>
+                          <td className="py-2 px-4 border-b">{area.cantidad}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Nombre del Trabajador</td>
+                          <td className="py-2 px-4 border-b">{area.nombreTrabajador}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Descripción</td>
+                          <td className="py-2 px-4 border-b">{area.descripcion}</td>
+                        </tr>
+                        <tr>
+                          <td className="py-2 px-4 border-b">Reportes</td>
+                          <td className="py-2 px-4 border-b">{area.reportes}</td>
+                        </tr>
+                        {area.mediciones && area.mediciones.length > 0 && (
+                          <tr>
+                            <td colSpan="2" className="py-2 px-4 border-b">
+                              <h4 className="font-semibold text-lg mt-4">Mediciones:</h4>
+                              <div className="overflow-x-auto w-full">
+                                <table className="min-w-full bg-gray-100">
+                                  <thead>
+                                    <tr>
+                                      <th className="py-2 px-4 border-b">Punto</th>
+                                      <th className="py-2 px-4 border-b">Puesto</th>
+                                      <th className="py-2 px-4 border-b">Identificación</th>
+                                      <th className="py-2 px-4 border-b">Horario</th>
+                                      <th className="py-2 px-4 border-b">E2</th>
+                                      <th className="py-2 px-4 border-b">E1</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {area.mediciones.map((medicion, idx) => (
+                                      <tr key={idx}>
+                                        <td className="py-2 px-4 border-b">Punto {idx + 1}</td>
+                                        <td className="py-2 px-4 border-b">{medicion.puesto}</td>
+                                        <td className="py-2 px-4 border-b">{medicion.identificacion}</td>
+                                        <td className="py-2 px-4 border-b">{medicion['horario_0']}</td>
+                                        <td className="py-2 px-4 border-b">{medicion.e2}</td>
+                                        <td className="py-2 px-4 border-b">{medicion.e1}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                </tbody>
+              </table>
             </div>
           )}
           <div className="mt-4 text-center">

@@ -13,7 +13,18 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
       updatedMediciones[index].mediciones[medIndex] = {};
     }
     updatedMediciones[index].mediciones[medIndex][field] = value;
+
+    // Actualizar el formData global
     handleMedicionChange(index, 'mediciones', updatedMediciones[index].mediciones);
+
+    // Guardar en localStorage
+    const updatedFormData = { ...formData, mediciones: updatedMediciones };
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('formData', JSON.stringify(updatedFormData));
+      console.log('Datos guardados en localStorage:', updatedFormData);
+    }
+
+    console.log('Datos de medición actualizada:', updatedMediciones[index].mediciones[medIndex]);
   };
 
   // Generar automaticamente los horarios para cada punto despues del primero
@@ -50,6 +61,7 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
     return `${formattedHours}:${formattedMinutes}`;
   };
 
+  // Guardar las mediciones y mostrarlas en consola
   const handleSaveMedicion = () => {
     const formattedData = {
       puesto: formData.mediciones[index]?.puesto,
@@ -110,20 +122,6 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
               readOnly={calcularHorarioConsecutivo && index > 0} // Hacerlo solo de lectura para puntos despues del primero
             />
           </div>
-
-          {/* E1 */}
-          <div className="mb-4">
-            <label className="block mb-1">E1 (Medicion {medIndex + 1}):</label>
-            <input
-              type="number"
-              name={`e1_${medIndex}`}
-              value={formData.mediciones[index]?.mediciones?.[medIndex]?.e1 || ''}
-              onChange={(e) => handleFieldChange(medIndex, 'e1', e.target.value)}
-              className="border p-2 w-full rounded"
-              required
-            />
-          </div>
-
           {/* E2 */}
           <div className="mb-4">
             <label className="block mb-1">E2 (Medicion {medIndex + 1}):</label>
@@ -132,6 +130,18 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
               name={`e2_${medIndex}`}
               value={formData.mediciones[index]?.mediciones?.[medIndex]?.e2 || ''}
               onChange={(e) => handleFieldChange(medIndex, 'e2', e.target.value)}
+              className="border p-2 w-full rounded"
+              required
+            />
+          </div>
+          {/* E1 */}
+          <div className="mb-4">
+            <label className="block mb-1">E1 (Medicion {medIndex + 1}):</label>
+            <input
+              type="number"
+              name={`e1_${medIndex}`}
+              value={formData.mediciones[index]?.mediciones?.[medIndex]?.e1 || ''}
+              onChange={(e) => handleFieldChange(medIndex, 'e1', e.target.value)}
               className="border p-2 w-full rounded"
               required
             />

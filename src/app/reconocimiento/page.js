@@ -34,6 +34,7 @@ export default function Reconocimiento() {
   useEffect(() => {
     if (typeof window !== 'undefined' && areas.length > 0) {
       localStorage.setItem('areas', JSON.stringify(areas));
+      console.log('Datos guardados en localStorage:', areas);
     }
   }, [areas]);
 
@@ -161,6 +162,7 @@ export default function Reconocimiento() {
     if (!validateForm()) {
       return;
     }
+    console.log('Datos guardados desde el botón principal:', areas);
     setSuccessMessage('Guardado con éxito');
   };
 
@@ -192,6 +194,15 @@ export default function Reconocimiento() {
 
   const handleShowSummary = () => {
     setShowSummary(true);
+  };
+
+  const clearLocalStorage = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('areas');
+      setAreas([getNewArea(1)]);
+      setCurrentAreaIndex(0);
+      console.log('Local storage limpiado');
+    }
   };
 
   const calculateMinAreas = (indiceArea) => {
@@ -257,13 +268,14 @@ export default function Reconocimiento() {
                 </button>
                 {visibleSections.puestoGeneral && (
                   <FormularioPuestos
-                    formData={areas[currentAreaIndex].puestos}
-                    handleChange={(updatedPuestos) => {
+                    puestos={areas[currentAreaIndex].puestos}
+                    handleSavePuestos={(updatedPuestos) => {
                       setAreas((prevAreas) =>
                         prevAreas.map((area, index) =>
                           index === currentAreaIndex ? { ...area, puestos: updatedPuestos } : area
                         )
                       );
+                      console.log('Datos de puestos guardados:', updatedPuestos);
                     }}
                   />
                 )}
@@ -323,6 +335,15 @@ export default function Reconocimiento() {
               Mostrar Resumen
             </button>
           </div>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={clearLocalStorage}
+              className="bg-red-500 text-white px-4 py-2 rounded"
+            >
+              Limpiar Datos Guardados
+            </button>
+          </div>
         </form>
       ) : (
         <div className="bg-gray-100 p-4 mt-4 rounded-lg">
@@ -358,10 +379,10 @@ export default function Reconocimiento() {
                       <td className="py-2 px-4 border-b">{area.potencia}</td>
                       <td className="py-2 px-4 border-b">{area.cantidad}</td>
                     </tr>
-                    {Array.isArray(area.puestos) && area.puestos.length > 0 && (
+                    {area.puestos.length > 0 && (
                       <tr key={`puestos-${index}`} className="bg-white">
                         <td colSpan="10" className="py-2 px-4 border-b">
-                          <h4 className="text-lg font-bold mt-4">Datos del Puesto:</h4>
+                          <h4 className="text-lg font-bold mt-4">Datos del Puesto - Área {area.idArea}:</h4>
                           <div className="overflow-x-auto w-full">
                             <table className="min-w-full bg-gray-100">
                               <thead>
@@ -374,7 +395,7 @@ export default function Reconocimiento() {
                               </thead>
                               <tbody>
                                 {area.puestos.map((puesto, puestoIndex) => (
-                                  <tr key={`puesto-${puestoIndex}`} className="bg-white">
+                                  <tr key={`puesto-${index}-${puestoIndex}`} className="bg-white">
                                     <td className="py-2 px-4 border-b">{puesto.puestoTrabajador || 'No disponible'}</td>
                                     <td className="py-2 px-4 border-b">{puesto.numTrabajadores || 'No disponible'}</td>
                                     <td className="py-2 px-4 border-b">{puesto.descripcionActividades || 'No disponible'}</td>
