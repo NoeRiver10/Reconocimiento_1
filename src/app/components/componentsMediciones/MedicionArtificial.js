@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
 function MedicionArtificial({ index, formData, handleMedicionChange, calcularHorarioConsecutivo }) {
-  const [medicion, setMedicion] = useState(formData.mediciones[index] || {});
+  const [medicion, setMedicion] = useState(() => formData.mediciones[index] || {});
 
   // Manejar los cambios de los campos de medicion especificos
   const handleFieldChange = (field, value) => {
     const updatedMedicion = { ...medicion, [field]: value };
     setMedicion(updatedMedicion);
-    handleMedicionChange(index, field, value);
+    handleMedicionChange(index, 'mediciones', updatedMedicion);
   };
 
   useEffect(() => {
-    if (calcularHorarioConsecutivo && index > 0) {
+    if (calcularHorarioConsecutivo && index > 0 && !medicion['horario_0']) {
       const newHorario = calculateConsecutiveHorario();
       handleFieldChange('horario_0', newHorario);
     }
@@ -19,27 +19,30 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem(`medicion_${index}`, JSON.stringify(medicion));
-      console.log('Medicion guardada en localStorage:', medicion);
+      const updatedFormData = {
+        ...formData,
+        mediciones: [
+          ...formData.mediciones.slice(0, index),
+          medicion,
+          ...formData.mediciones.slice(index + 1),
+        ],
+      };
+      localStorage.setItem('formData', JSON.stringify(updatedFormData));
+      console.log('Medicion guardada en localStorage:', updatedFormData);
     }
   }, [medicion]);
 
   const calculateConsecutiveHorario = () => {
     if (index === 0) {
-      // El primer punto es ingresado manualmente
       return formData.mediciones[index]?.['horario_0'] || '';
     }
-  
-    // Obtener el horario del punto anterior
+
     const previousHorario = formData.mediciones[index - 1]?.['horario_0'];
     if (!previousHorario || previousHorario === '') {
-      return '00:00'; // Valor por defecto si no hay horario previo
+      return '00:00';
     }
 
-    // Extraer horas y minutos del horario anterior
     const [hours, minutes] = previousHorario.split(':').map((timePart) => parseInt(timePart, 10));
-
-    // Calcular el nuevo horario sumando un minuto al anterior
     let newMinutes = minutes + 1;
     let newHours = hours;
 
@@ -48,7 +51,6 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
       newHours = (newHours + 1) % 24;
     }
 
-    // Formatear el nuevo horario con dos digitos para las horas y minutos
     const formattedHours = String(newHours).padStart(2, '0');
     const formattedMinutes = String(newMinutes).padStart(2, '0');
 
@@ -96,11 +98,12 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           name="horario_0"
           value={medicion['horario_0'] || ''}
           onChange={(e) => handleFieldChange('horario_0', e.target.value)}
-          className={`border p-2 w-full rounded ${calcularHorarioConsecutivo && index > 0 ? 'bg-gray-200 cursor-not-allowed' : 'bg-white'}`}
+          className={`border p-2 w-full rounded ${index > 0 ? 'bg-gray-200 cursor-not-allowed' : 'bg-white'}`}
           required
-          readOnly={calcularHorarioConsecutivo && index > 0}
+          readOnly={index > 0}
         />
       </div>
+
       {/* Campo E2 */}
       <div className="mb-4">
         <label className="block mb-1">E2:</label>
@@ -125,6 +128,51 @@ function MedicionArtificial({ index, formData, handleMedicionChange, calcularHor
           required
         />
       </div>
+
+      {/* Nueva Pregunta: ¿Existe pared? */}
+      <div className="mb-4">
+        <label className="block mb-1">¿EXISTE PARED?</label>
+        <select
+          name="existe_pared"
+          value={medicion.existe_pared || ''}
+          onChange={(e) => handleFieldChange('existe_pared', e.target.value)}
+          className="border p-2 w-full rounded bg-white"
+          required
+        >
+          <option value="">Selecciona una opción</option>
+          <option value="sí">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      {/* Campos E1 y E2 adicionales solo si 'existe_pared' es 'sí' */}
+      {medicion.existe_pared === 'sí' && (
+        <>
+          <div className="mb-4">
+            <label className="block mb-1">E2 (adicional):</label>
+            <input
+              type="number"
+              name="e2_adicional"
+              value={medicion.e2_adicional || ''}
+              onChange={(e) => handleFieldChange('e2_adicional', e.target.value)}
+              className="border p-2 w-full rounded bg-white"
+              required
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1">E1 (adicional):</label>
+            <input
+              type="number"
+              name="e1_adicional"
+              value={medicion.e1_adicional || ''}
+              onChange={(e) => handleFieldChange('e1_adicional', e.target.value)}
+              className="border p-2 w-full rounded bg-white"
+              required
+            />
+          </div>
+        </>
+      )}
 
       {/* Boton para guardar la medicion */}
       <div className="mt-4 text-center">

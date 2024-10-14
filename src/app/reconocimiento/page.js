@@ -390,7 +390,6 @@ export default function Reconocimiento() {
                                   <th className="py-2 px-4 border-b">Puesto del Trabajador</th>
                                   <th className="py-2 px-4 border-b">Número de Trabajadores</th>
                                   <th className="py-2 px-4 border-b">Descripción de Actividades</th>
-                                  <th className="py-2 px-4 border-b">Tarea Visual</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -399,7 +398,6 @@ export default function Reconocimiento() {
                                     <td className="py-2 px-4 border-b">{puesto.puestoTrabajador || 'No disponible'}</td>
                                     <td className="py-2 px-4 border-b">{puesto.numTrabajadores || 'No disponible'}</td>
                                     <td className="py-2 px-4 border-b">{puesto.descripcionActividades || 'No disponible'}</td>
-                                    <td className="py-2 px-4 border-b">{puesto.tareaVisual || 'No disponible'}</td>
                                   </tr>
                                 ))}
                               </tbody>

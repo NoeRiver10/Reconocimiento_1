@@ -6,6 +6,7 @@ import IluminacionMediciones from '../components/componentsMediciones/Iluminacio
 import MedicionItem from '../components/componentsMediciones/MedicionItem';
 import MedicionCombinada from '../components/componentsMediciones/MedicionCombinada';
 import MedicionArtificial from '../components/componentsMediciones/MedicionArtificial';
+import ResumenMediciones from '../components/componentsMediciones/ResumenMediciones';
 
 export default function Mediciones() {
   const searchParams = useSearchParams();
@@ -73,14 +74,46 @@ export default function Mediciones() {
   };
 
   const handleMedicionChange = (index, field, value) => {
-    const newMediciones = [...formData.mediciones];
-    if (!newMediciones[index]) {
-      newMediciones[index] = { mediciones: [] };
-    }
-    if (typeof newMediciones[index] === 'object' && !Array.isArray(newMediciones[index])) {
+    setFormData((prevFormData) => {
+      const newMediciones = [...prevFormData.mediciones];
+      if (!newMediciones[index]) {
+        newMediciones[index] = { mediciones: [] };
+      }
       newMediciones[index][field] = value;
+
+      // Si se está cambiando el horario manualmente en el primer punto, actualizar los horarios consecutivos
+      if (field === 'horario_0' && index === 0) {
+        for (let i = 1; i < newMediciones.length; i++) {
+          newMediciones[i]['horario_0'] = calculateConsecutiveHorario(newMediciones[i - 1]['horario_0']);
+        }
+      }
+
+      return { ...prevFormData, mediciones: newMediciones };
+    });
+  };
+
+  const calculateConsecutiveHorario = (previousHorario) => {
+    if (!previousHorario || previousHorario === '') {
+      return '00:00'; // Valor por defecto si no hay horario previo
     }
-    setFormData({ ...formData, mediciones: newMediciones });
+
+    // Extraer horas y minutos del horario anterior
+    const [hours, minutes] = previousHorario.split(':').map((timePart) => parseInt(timePart, 10));
+
+    // Calcular el nuevo horario sumando un minuto al anterior
+    let newMinutes = minutes + 1;
+    let newHours = hours;
+
+    if (newMinutes >= 60) {
+      newMinutes = 0;
+      newHours = (newHours + 1) % 24;
+    }
+
+    // Formatear el nuevo horario con dos dígitos para las horas y minutos
+    const formattedHours = String(newHours).padStart(2, '0');
+    const formattedMinutes = String(newMinutes).padStart(2, '0');
+
+    return `${formattedHours}:${formattedMinutes}`;
   };
 
   const handleSaveMediciones = () => {
@@ -155,6 +188,7 @@ export default function Mediciones() {
                 index={currentMedicionIndex}
                 formData={formData}
                 handleMedicionChange={handleMedicionChange}
+                calcularHorarioConsecutivo={true}
               />
             )
           )}
@@ -189,138 +223,12 @@ export default function Mediciones() {
           </div>
         </form>
       ) : (
-        <div className="bg-gray-100 p-4 rounded-lg dark:bg-gray-800">
-          <h2 className="text-2xl font-bold mb-4 text-center">Resumen Completo</h2>
-          <div className="mb-4">
-            <label className="block mb-1 text-center">Seleccionar Área para Ver Detalles:</label>
-            <select
-              value={selectedAreaId}
-              onChange={handleSummaryAreaSelect}
-              className="border p-2 w-full rounded"
-            >
-              <option value="">Selecciona un área</option>
-              {areas.map((area) => (
-                <option key={area.idArea} value={area.idArea}>
-                  Área {area.idArea} - {area.areaIluminada || 'Sin nombre'}
-                </option>
-              ))}
-            </select>
-          </div>
-          {selectedAreaId && (
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white dark:bg-gray-700">
-                <thead>
-                  <tr>
-                    <th className="py-2 px-4 border-b">Campo</th>
-                    <th className="py-2 px-4 border-b">Valor</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {areas
-                    .filter((area) => area.idArea === parseInt(selectedAreaId))
-                    .map((area, index) => (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Área Iluminada</td>
-                          <td className="py-2 px-4 border-b">{area.areaIluminada}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Número de Puntos a Evaluar</td>
-                          <td className="py-2 px-4 border-b">{area.numPuntosEvaluar}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Tipo de Iluminación</td>
-                          <td className="py-2 px-4 border-b">{area.tipoIluminacion}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Dimensiones</td>
-                          <td className="py-2 px-4 border-b">Altura: {area.altura}, Largo: {area.largo}, Ancho: {area.ancho}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Índice de Área</td>
-                          <td className="py-2 px-4 border-b">{area.indiceArea}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Tipo de Luminaria</td>
-                          <td className="py-2 px-4 border-b">{area.tipoLuminaria}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Potencia</td>
-                          <td className="py-2 px-4 border-b">{area.potencia}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Distribución</td>
-                          <td className="py-2 px-4 border-b">{area.distribucion}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Iluminación Localizada</td>
-                          <td className="py-2 px-4 border-b">{area.iluminacionLocalizada}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Cantidad</td>
-                          <td className="py-2 px-4 border-b">{area.cantidad}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Nombre del Trabajador</td>
-                          <td className="py-2 px-4 border-b">{area.nombreTrabajador}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Descripción</td>
-                          <td className="py-2 px-4 border-b">{area.descripcion}</td>
-                        </tr>
-                        <tr>
-                          <td className="py-2 px-4 border-b">Reportes</td>
-                          <td className="py-2 px-4 border-b">{area.reportes}</td>
-                        </tr>
-                        {area.mediciones && area.mediciones.length > 0 && (
-                          <tr>
-                            <td colSpan="2" className="py-2 px-4 border-b">
-                              <h4 className="font-semibold text-lg mt-4">Mediciones:</h4>
-                              <div className="overflow-x-auto w-full">
-                                <table className="min-w-full bg-gray-100">
-                                  <thead>
-                                    <tr>
-                                      <th className="py-2 px-4 border-b">Punto</th>
-                                      <th className="py-2 px-4 border-b">Puesto</th>
-                                      <th className="py-2 px-4 border-b">Identificación</th>
-                                      <th className="py-2 px-4 border-b">Horario</th>
-                                      <th className="py-2 px-4 border-b">E2</th>
-                                      <th className="py-2 px-4 border-b">E1</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {area.mediciones.map((medicion, idx) => (
-                                      <tr key={idx}>
-                                        <td className="py-2 px-4 border-b">Punto {idx + 1}</td>
-                                        <td className="py-2 px-4 border-b">{medicion.puesto}</td>
-                                        <td className="py-2 px-4 border-b">{medicion.identificacion}</td>
-                                        <td className="py-2 px-4 border-b">{medicion['horario_0']}</td>
-                                        <td className="py-2 px-4 border-b">{medicion.e2}</td>
-                                        <td className="py-2 px-4 border-b">{medicion.e1}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => setShowSummary(false)}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Volver a la Edición
-            </button>
-          </div>
-        </div>
+        <ResumenMediciones
+          areas={areas}
+          selectedAreaId={selectedAreaId}
+          handleSummaryAreaSelect={handleSummaryAreaSelect}
+          setShowSummary={setShowSummary}
+        />
       )}
     </div>
   );

@@ -9,6 +9,9 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
     if (!updatedMediciones[index]) {
       updatedMediciones[index] = { mediciones: [] };
     }
+    if (!updatedMediciones[index].mediciones) {
+      updatedMediciones[index].mediciones = [];
+    }
     if (!updatedMediciones[index].mediciones[medIndex]) {
       updatedMediciones[index].mediciones[medIndex] = {};
     }
@@ -70,6 +73,9 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
         horario: medicion.horario,
         e1: medicion.e1,
         e2: medicion.e2,
+        existe_pared: medicion.existe_pared,
+        e1_adicional: medicion.e1_adicional,
+        e2_adicional: medicion.e2_adicional,
         medicionIndex: idx + 1,
       }))
     };
@@ -146,6 +152,50 @@ function MedicionCombinada({ index, formData, handleMedicionChange, calcularHora
               required
             />
           </div>
+
+          {/* Nueva Pregunta: ¿Existe pared? */}
+          <div className="mb-4">
+            <label className="block mb-1">¿EXISTE PARED?</label>
+            <select
+              name={`existe_pared_${medIndex}`}
+              value={formData.mediciones[index]?.mediciones?.[medIndex]?.existe_pared || ''}
+              onChange={(e) => handleFieldChange(medIndex, 'existe_pared', e.target.value)}
+              className="border p-2 w-full rounded"
+              required
+            >
+              <option value="">Selecciona una opción</option>
+              <option value="sí">Sí</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          {/* Campos E1 y E2 adicionales solo si 'existe_pared' es 'sí' */}
+          {formData.mediciones[index]?.mediciones?.[medIndex]?.existe_pared === 'sí' && (
+            <>
+              <div className="mb-4">
+                <label className="block mb-1">E2 (adicional) {medIndex + 1}:</label>
+                <input
+                  type="number"
+                  name={`e2_adicional_${medIndex}`}
+                  value={formData.mediciones[index]?.mediciones?.[medIndex]?.e2_adicional || ''}
+                  onChange={(e) => handleFieldChange(medIndex, 'e2_adicional', e.target.value)}
+                  className="border p-2 w-full rounded"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-1">E1 (adicional) {medIndex + 1}:</label>
+                <input
+                  type="number"
+                  name={`e1_adicional_${medIndex}`}
+                  value={formData.mediciones[index]?.mediciones?.[medIndex]?.e1_adicional || ''}
+                  onChange={(e) => handleFieldChange(medIndex, 'e1_adicional', e.target.value)}
+                  className="border p-2 w-full rounded"
+                  required
+                />
+              </div>
+            </>
+          )}
         </div>
       ))}
 
